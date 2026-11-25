@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Narrador</title>
+<style>
+html,body{margin:0;background:#101012;color:#eee;font:17px/1.5 system-ui,sans-serif}
+
+/* ===== NARRADOR ===== */
+#nar-tab{position:fixed;right:0;top:34%;z-index:99998;width:40px;height:auto;border-radius:14px 0 0 14px;
+ background:linear-gradient(90deg,#ff6a35,#d63f14);color:#fff;display:flex;flex-direction:column;align-items:center;
+ padding:12px 0 16px;box-sizing:border-box;cursor:pointer;user-select:none;-webkit-user-select:none;
+ box-shadow:-4px 0 14px rgba(0,0,0,.45),inset 1px 0 0 rgba(255,255,255,.25)}
+#nar-tab span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:800;letter-spacing:2px;font-size:15px;margin-top:10px;line-height:1}
+#nar-panel{position:fixed;right:0;top:4.8%;height:85.4%;width:79%;z-index:99999;overflow-y:auto;box-sizing:border-box;
+ background:linear-gradient(#232325,#19191b);border-radius:18px 0 0 18px;padding:1em 1em 2em;color:#fff;
+ font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14.4px;display:none;
+ -webkit-user-select:none;user-select:none;box-shadow:-8px 0 28px rgba(0,0,0,.55);scrollbar-width:none}
+#nar-panel::-webkit-scrollbar{display:none}
+#nar-panel.open{display:block}
+#nar-tab.open{right:79%}
+#nar-panel *{box-sizing:border-box}
+.nh{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #343436;padding:.4em 0 .9em}
+.nh b{font-size:1.45em;font-weight:800;display:flex;align-items:center;gap:.35em;letter-spacing:.01em}
+.nb{display:flex;align-items:center;justify-content:center;text-align:center;border:0;color:#fff;font-family:inherit;
+ font-weight:700;font-size:1.1em;line-height:1.25;border-radius:.9em;padding:.75em .5em;width:100%;
+ background:linear-gradient(#444446,#2a2a2c);
+ box-shadow:0 .16em 0 #0f0f10,0 .3em .6em rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.14)}
+.nb.ac{background:linear-gradient(#f4561e,#c93a10);box-shadow:0 .16em 0 #82230a,0 .35em .9em rgba(232,67,28,.45),inset 0 1px 0 rgba(255,255,255,.3)}
+.nb:active{transform:translateY(.2em);box-shadow:0 0 0 #0f0f10,0 .1em .3em rgba(0,0,0,.5),inset 0 .15em .4em rgba(0,0,0,.45);filter:brightness(.92)}
+.nb{transition:transform .06s,box-shadow .06s}
+.nb svg{width:1.45em;height:1.45em;stroke:#fff;fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.nr{display:flex;gap:.6em;margin-top:1.1em}
+.nr .nb{padding:.7em .3em}
+.big{padding:.8em .6em;margin-top:.8em;font-size:1.1em;letter-spacing:.01em}
+.sec{color:#a9a9ae;font-weight:700;font-size:.95em;letter-spacing:.1em;margin:1.4em 0 .55em}
+.ck{display:flex;align-items:center;gap:.75em;font-size:1.05em;font-weight:500;margin-top:.9em;line-height:1.3;color:#ececec}
+.ck input{appearance:none;-webkit-appearance:none;width:1.4em;height:1.4em;flex:none;margin:0;border-radius:.35em;
+ background:#2b2b2d;border:2px solid #5b5b5d;position:relative}
+.ck input:checked{background:#e8431c;border-color:#e8431c}
+.ck input:checked::after{content:"";position:absolute;left:.43em;top:.14em;width:.34em;height:.68em;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.sel{position:relative}
+.sel select{appearance:none;-webkit-appearance:none;width:100%;background:#0b0b0c;color:#fff;border:1px solid #232325;
+ border-radius:1em;padding:.75em 2.4em .75em 1em;font-size:1.05em;font-family:inherit;box-shadow:inset 0 2px 6px rgba(0,0,0,.6)}
+.sel::after{content:"";position:absolute;right:1.1em;top:50%;width:.7em;height:.7em;border:solid #bbb;border-width:0 2px 2px 0;
+ transform:translateY(-70%) rotate(45deg);pointer-events:none}
+#n-rate{-webkit-appearance:none;appearance:none;width:100%;height:1.8em;background:transparent;margin:.2em 0 0}
+#n-rate::-webkit-slider-runnable-track{height:.5em;border-radius:1em;
+ background:linear-gradient(90deg,#ff5a36 var(--p,20%),#4a4a4c var(--p,20%))}
+#n-rate::-webkit-slider-thumb{-webkit-appearance:none;width:1.5em;height:1.5em;border-radius:50%;background:#ff5a36;margin-top:-.5em;
+ box-shadow:0 2px 6px rgba(0,0,0,.6)}
+#n-rate::-moz-range-track{height:.65em;border-radius:1em;background:#4a4a4c}
+#n-rate::-moz-range-progress{height:.65em;border-radius:1em;background:#ff5a36}
+#n-rate::-moz-range-thumb{width:1.8em;height:1.8em;border:0;border-radius:50%;background:#ff5a36}
+.pct{color:#ffb21a;font-weight:800;font-size:1.7em;flex:1;text-align:center}
+#nar-card{position:fixed;left:12px;right:12px;bottom:16px;max-height:50%;z-index:100000;background:rgba(28,28,30,.96);color:#fff;
+ border-radius:20px;padding:12px 14px;display:none;flex-direction:column;font-family:system-ui,sans-serif;box-shadow:0 6px 24px #000a}
+#nar-card.open{display:flex}
+#nar-card .tx{overflow-y:auto;font-size:18px;white-space:pre-wrap;margin:10px 0}
+#nar-card .nb{font-size:16px;padding:10px;box-shadow:0 3px 0 #0f0f10}
+#nar-toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 16px;
+ border-radius:20px;z-index:100001;display:none;font:15px system-ui,sans-serif}
+</style></head><body>
+
+<!-- Tu contenido va acá. El Narrador lee todo lo que haya en la página. -->
+
+<div id="nar-tab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd9cc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M16 8.5a5 5 0 010 7M19 5.5a9 9 0 010 13"/></svg><span>NARRADOR</span></div>
+
+<div id="nar-panel">
+ <div class="nh"><b><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#ff6a35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M16 8.5a5 5 0 010 7M19 5.5a9 9 0 010 13"/></svg>NARRADOR</b><button class="nb ac" id="n-x" style="width:2.8em;padding:.45em;font-size:1em"><svg viewBox="0 0 24 24" style="width:1.1em;height:1.1em;stroke-width:3"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+ <div class="nr">
+  <button class="nb" id="n-prev"><svg viewBox="0 0 24 24"><path d="M6 5v14M19 5L9 12l10 7z"/></svg></button>
+  <button class="nb ac" id="n-play"></button>
+  <button class="nb" id="n-stop"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/></svg></button>
+  <button class="nb" id="n-next"><svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg></button>
+ </div>
+ <button class="nb big" id="n-all">Leer todo desde el inicio</button>
+ <button class="nb big" id="n-sel">Leer el texto seleccionado</button>
+ <label class="ck" style="margin-top:1.2em"><input type="checkbox" id="n-tap"><span>Tocar un texto para escucharlo</span></label>
+ <div class="sec">VOZ</div><div class="sel"><select id="n-voice"></select></div>
+ <div class="sec" id="n-spd">VELOCIDAD: 1×</div><input type="range" id="n-rate" min="0.5" max="3" step="0.1" value="1">
+ <label class="ck"><input type="checkbox" id="n-vib"><span>Vibrar al tocar los botones</span></label>
+ <div class="sec">TAMAÑO DEL TEXTO</div>
+ <div class="nr" style="margin-top:0;align-items:center"><button class="nb" id="n-am" style="font-size:1.35em;padding:.3em">A−</button><div class="pct" id="n-pct">90%</div><button class="nb" id="n-ap" style="font-size:1.35em;padding:.3em">A+</button></div>
+
+ <div class="sec" style="margin-top:2em">TRADUCIR</div>
+ <button class="nb" id="n-tr">🌐 Traducir la pantalla</button>
+ <button class="nb" id="n-trp" style="margin-top:.7em">🌐🔊 Traducir y leer la pantalla</button>
+ <button class="nb" id="n-trs" style="margin-top:.7em">Traducir y leer lo seleccionado</button>
+ <div class="sec">TRADUCIR A</div>
+ <div class="sel"><select id="n-lang"></select></div>
+ <label class="ck"><input type="checkbox" id="n-trall"><span>Traducir todo antes de leer</span></label>
+</div>
+
+<div id="nar-card"><div style="display:flex;justify-content:space-between;align-items:center"><b id="nc-t">🌐 Traducción</b>
+ <button class="nb ac" id="nc-x" style="width:48px;padding:8px">✕</button></div>
+ <div class="tx" id="nc-tx"></div>
+ <div style="display:flex;gap:8px"><button class="nb ac" id="nc-r" style="font-size:16px;padding:10px">🔊 Leer</button><button class="nb" id="nc-c" style="font-size:16px;padding:10px">Copiar</button></div></div>
+<div id="nar-toast"></div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id), S=window.speechSynthesis;
+const ICO={play:'<svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></svg>',pause:'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>'};
+$("n-play").innerHTML=ICO.play;
+const LANGS=[["es","Español"],["en","English"],["pt","Português"],["fr","Français"],["de","Deutsch"],["it","Italiano"],["ja","日本語"],["ko","한국어"],["zh-CN","中文"],["ru","Русский"],["ar","العربية"],["hi","हिन्दी"]];
+let saved={};try{saved=JSON.parse(localStorage.getItem("nar")||"{}")}catch(e){}
+const cfg=Object.assign({rate:1,scale:90,voice:"",lang:"es",tap:false,vib:false,trall:false},saved);
+const save=()=>{try{localStorage.setItem("nar",JSON.stringify(cfg))}catch(e){}};
+let q=[],i=0,playing=false,gen=0,speakLang=null;
+
+function toast(t){const e=$("nar-toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2400)}
+function buzz(){if(cfg.vib&&navigator.vibrate)navigator.vibrate(18)}
+
+/* ---- panel ---- */
+const isOpen=()=>$("nar-panel").classList.contains("open");
+function setOpen(o){$("nar-panel").classList.toggle("open",o);$("nar-tab").classList.toggle("open",o)}
+$("nar-tab").addEventListener("click",()=>setOpen(!isOpen()));
+$("n-x").onclick=()=>setOpen(false);
+function applyScale(){$("nar-panel").style.fontSize=(16*cfg.scale/100)+"px";$("n-pct").textContent=cfg.scale+"%"}
+$("n-am").onclick=()=>{cfg.scale=Math.max(70,cfg.scale-10);applyScale();save()};
+$("n-ap").onclick=()=>{cfg.scale=Math.min(150,cfg.scale+10);applyScale();save()};
+applyScale();
+document.querySelectorAll("#nar-panel .nb").forEach(b=>b.addEventListener("click",buzz));
+
+/* ---- ajustes ---- */
+[["n-tap","tap"],["n-vib","vib"],["n-trall","trall"]].forEach(([id,k])=>{$(id).checked=cfg[k];$(id).onchange=e=>{cfg[k]=e.target.checked;save()}});
+$("n-rate").value=cfg.rate;
+function rateLbl(){$("n-rate").style.setProperty("--p",((cfg.rate-.5)/2.5*100)+"%");$("n-spd").textContent="VELOCIDAD: "+(+cfg.rate).toFixed(1).replace(".0","")+"×"}
+rateLbl();
+$("n-rate").oninput=e=>{cfg.rate=+e.target.value;rateLbl()};
+$("n-rate").onchange=()=>{save();if(playing)speakCurrent()};
+LANGS.forEach(([c,n])=>$("n-lang").add(new Option(n,c)));$("n-lang").value=cfg.lang;
+$("n-lang").onchange=e=>{cfg.lang=e.target.value;save()};
+
+function loadVoices(){
+ const vs=S?S.getVoices():[];const sel=$("n-voice");sel.innerHTML="";
+ const es=vs.filter(v=>v.lang.toLowerCase().startsWith("es")),rest=vs.filter(v=>!es.includes(v));
+ [...es,...rest].forEach(v=>sel.add(new Option(v.name+" ("+v.lang+")",v.name)));
+ if(cfg.voice)sel.value=cfg.voice;
+}
+if(S){loadVoices();S.onvoiceschanged=loadVoices}
+$("n-voice").onchange=e=>{cfg.voice=e.target.value;save();if(playing)speakCurrent()};
+
+/* ---- lectura ---- */
+function chunks(text){
+ const out=[];text.split(/\n+/).forEach(line=>{
+  line=line.replace(/\s+/g," ").trim();if(!line)return;
+  const parts=line.match(/[^.!?…]+[.!?…]*\s*/g)||[line];let buf="";
+  parts.forEach(p=>{if(buf&&(buf+p).length>220){out.push(buf.trim());buf=""}buf+=p;
+   while(buf.length>260){let k=buf.lastIndexOf(" ",240);if(k<1)k=240;out.push(buf.slice(0,k).trim());buf=buf.slice(k)}});
+  if(buf.trim())out.push(buf.trim())});
+ return out;
+}
+function pickVoice(lang){
+ const vs=S.getVoices();
+ if(!lang)return vs.find(v=>v.name===cfg.voice)||null;
+ return vs.find(v=>v.lang.toLowerCase().startsWith(lang.toLowerCase().slice(0,2)))||null;
+}
+function speakCurrent(){
+ if(!S)return toast("Este dispositivo no tiene voz");
+ if(i>=q.length)return stop();
+ S.cancel();const g=++gen;
+ const u=new SpeechSynthesisUtterance(q[i]);u.rate=cfg.rate;
+ const v=pickVoice(speakLang);if(v){u.voice=v;u.lang=v.lang}else if(speakLang)u.lang=speakLang;
+ const next=()=>{if(g===gen&&playing){i++;speakCurrent()}};
+ u.onend=next;u.onerror=next;
+ playing=true;$("n-play").innerHTML=ICO.pause;S.speak(u);
+}
+function start(text,lang){
+ const c=chunks(text);if(!c.length)return toast("No encontré texto para leer");
+ q=c;i=0;speakLang=lang||null;playing=true;speakCurrent();
+}
+function stop(){gen++;playing=false;if(S)S.cancel();$("n-play").innerHTML=ICO.play;q=[];i=0}
+$("n-play").onclick=()=>{
+ if(playing){gen++;playing=false;S.cancel();$("n-play").innerHTML=ICO.play}
+ else if(q.length&&i<q.length){playing=true;speakCurrent()}
+ else readAll();
+};
+$("n-stop").onclick=stop;
+$("n-prev").onclick=()=>{if(q.length){i=Math.max(0,i-1);if(playing)speakCurrent()}};
+$("n-next").onclick=()=>{if(q.length){i=Math.min(q.length,i+1);if(playing)speakCurrent()}};
+
+const NAR_IDS=["nar-tab","nar-panel","nar-card","nar-toast"];
+function pageText(){
+ const els=NAR_IDS.map($),prev=els.map(e=>e.style.display);
+ els.forEach(e=>e.style.display="none");
+ const t=(document.body.innerText||"").trim();
+ els.forEach((e,k)=>e.style.display=prev[k]);
+ return t;
+}
+const selText=()=>String(window.getSelection?window.getSelection():"").trim();
+
+async function prep(text){
+ if(!cfg.trall)return {text,lang:null};
+ toast("Traduciendo…");
+ try{return {text:await translate(text,cfg.lang),lang:cfg.lang}}catch(e){toast("No pude traducir (¿hay internet?)");return {text,lang:null}}
+}
+async function readAll(){setOpen(false);window.scrollTo(0,0);const r=await prep(pageText());start(r.text,r.lang)}
+$("n-all").onclick=readAll;
+$("n-sel").onclick=async()=>{const t=selText();if(!t)return toast("Seleccioná un texto primero");setOpen(false);const r=await prep(t);start(r.text,r.lang)};
+
+/* tocar un texto para escucharlo */
+document.addEventListener("click",async e=>{
+ if(!cfg.tap||e.target.closest("#nar-panel,#nar-tab,#nar-card"))return;
+ const t=(e.target.innerText||e.target.textContent||"").trim();if(!t)return;
+ const r=await prep(t);start(r.text,r.lang);
+},true);
+
+/* ---- traducción (necesita internet) ---- */
+async function tr1(txt,tl){
+ const r=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="+encodeURIComponent(tl)+"&dt=t&q="+encodeURIComponent(txt));
+ if(!r.ok)throw new Error("http");const j=await r.json();return j[0].map(x=>x[0]).join("");
+}
+async function translate(text,tl){
+ const lines=text.split(/\n+/).map(s=>s.trim()).filter(Boolean),out=[];
+ let buf="";const flush=async()=>{if(buf){out.push(await tr1(buf,tl));buf=""}};
+ for(const l of lines){if(buf.length+l.length>1200)await flush();buf+=(buf?"\n":"")+l}
+ await flush();return out.join("\n");
+}
+let cardText="";
+function showCard(t){cardText=t;$("nc-t").textContent="🌐 Traducción → "+(LANGS.find(x=>x[0]===cfg.lang)||[0,cfg.lang])[1];$("nc-tx").textContent=t;$("nar-card").classList.add("open")}
+$("nc-x").onclick=()=>$("nar-card").classList.remove("open");
+$("nc-r").onclick=()=>start(cardText,cfg.lang);
+$("nc-c").onclick=()=>{try{navigator.clipboard.writeText(cardText);toast("Copiado")}catch(e){toast("No pude copiar")}};
+async function doTr(text,speak){
+ if(!text)return toast("No encontré texto para traducir");
+ setOpen(false);toast("Traduciendo…");
+ try{const t=await translate(text,cfg.lang);showCard(t);if(speak)start(t,cfg.lang)}
+ catch(e){toast("No pude traducir. Hace falta internet.")}
+}
+$("n-tr").onclick=()=>doTr(pageText(),false);
+$("n-trp").onclick=()=>doTr(pageText(),true);
+$("n-trs").onclick=()=>doTr(selText(),true);
+})();
+</script>
+</body></html>
